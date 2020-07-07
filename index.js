@@ -22,7 +22,7 @@ app.get("/poblaciones/:id", function (req, res) {
         if (poblacion) {
             res.json(poblacion);
         } else {
-            res.status(404).json("Población no encontrada");
+            res.status(404).json("Población no registrada");
         }
     })
     .catch(err => res.json(err))
@@ -47,12 +47,31 @@ app.put("/poblaciones/:id", function (req, res) {
     const nuevosDatos = req.body;
     Poblacion.findOne({where: {id}})
     .then(poblacion => {
-        // asignamos(assign) los campos de "nuevosDatos" a "poblacion":
-        Object.assign(poblacion, nuevosDatos);
-        // guardamos los nuevos datos:
-        poblacion.save()
-        // generamos la respuesta:
-        .then (poblacion => res.json(poblacion))
+        if (poblacion) {
+            // asignamos(assign) los campos de "nuevosDatos" a "poblacion":
+            Object.assign(poblacion, nuevosDatos);
+            // guardamos los nuevos datos:
+            poblacion.save()
+            // generamos la respuesta:
+            .then(poblacion => res.json(poblacion))
+        } else {
+            res.status(404).json("Población no registrada");
+        }
+    })
+    .catch(err => res.status(400).json(err))
+});
+
+//para eliminar entidades, utilizar el método DELETE
+app.delete("/poblaciones/:id", function (req, res) {
+    const {id} = req.params;
+    Poblacion.findOne({where: {id}})
+    .then(poblacion => {
+        if (poblacion) {
+            poblacion.destroy()
+            .then(() => res.status(204).json())
+        } else {
+            res.status(404).json("Población no registrada");
+        }
     })
     .catch(err => res.status(400).json(err))
 });
